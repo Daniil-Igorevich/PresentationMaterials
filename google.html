@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Вход – Google Аккаунты</title>
+<style>
+  :root{
+    --g-blue:#1a73e8;
+    --g-blue-hover:#1765cc;
+    --g-text:#202124;
+    --g-text-secondary:#5f6368;
+    --g-border:#dadce0;
+    --g-error:#d93025;
+    --g-bg:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;max-width:100vw;overflow-x:hidden}
+
+  body{
+    font-family:'Roboto','Segoe UI',Arial,sans-serif;
+    background:var(--g-bg);
+    color:var(--g-text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+  }
+
+  /* Карточка */
+  .card{
+    width:100%;
+    max-width:450px;
+    border:1px solid var(--g-border);
+    border-radius:8px;
+    padding:48px 40px 36px;
+    text-align:center;
+  }
+
+  .logo{width:48px;height:48px;margin:0 auto 16px;display:block}
+
+  h1{font-size:24px;font-weight:400;margin-bottom:8px}
+  .subtitle{font-size:16px;color:var(--g-text);margin-bottom:32px}
+  .subtitle .email{font-weight:500}
+
+  /* Поле с плавающей подписью */
+  .field{position:relative;text-align:left;margin-bottom:6px}
+  .field input{
+    width:100%;
+    padding:13px 15px;
+    font-size:16px;
+    border:1px solid var(--g-border);
+    border-radius:4px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+    color:var(--g-text);
+    background:transparent;
+    font-family:inherit;
+  }
+  .field input:focus{
+    border-color:var(--g-blue);
+    box-shadow:0 0 0 1px var(--g-blue);
+  }
+  .field input.error{
+    border-color:var(--g-error);
+    box-shadow:0 0 0 1px var(--g-error);
+  }
+  .field label{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+    color:var(--g-text-secondary);
+    pointer-events:none;
+    transition:all .15s ease;
+    background:#fff;
+    padding:0 4px;
+  }
+  .field input:focus + label,
+  .field input.filled + label{
+    top:0;
+    font-size:12px;
+    color:var(--g-blue);
+  }
+  .field input.error:focus + label,
+  .field input.error.filled + label{color:var(--g-error)}
+
+  /* Сообщение об ошибке под полем */
+  .error-msg{
+    display:none;
+    color:var(--g-error);
+    font-size:12px;
+    text-align:left;
+    margin:4px 0 8px 2px;
+    line-height:1.4;
+  }
+  .error-msg.show{display:block}
+
+  /* Кнопки-ссылки */
+  .link{
+    display:inline-block;
+    font-size:14px;
+    color:var(--g-blue);
+    text-decoration:none;
+    font-weight:500;
+    margin:8px 0 28px;
+    cursor:pointer;
+  }
+  .link:hover{text-decoration:underline}
+
+  .actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .btn-create{
+    background:none;
+    border:none;
+    color:var(--g-blue);
+    font-size:14px;
+    font-weight:500;
+    padding:10px 8px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .btn-create:hover{background:rgba(26,115,232,.04)}
+
+  .btn-next{
+    background:var(--g-blue);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:10px 24px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .15s, box-shadow .15s;
+  }
+  .btn-next:hover{background:var(--g-blue-hover);box-shadow:0 1px 2px rgba(60,64,67,.3)}
+  .btn-next:active{box-shadow:0 1px 3px rgba(60,64,67,.4)}
+
+  /* Показ пароля */
+  .show-pass{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--g-text);
+    margin:12px 0 0 0;
+    text-align:left;
+    cursor:pointer;
+    user-select:none;
+  }
+  .show-pass input{
+    width:18px;height:18px;accent-color:var(--g-blue);cursor:pointer;
+  }
+
+  /* Футер */
+  .footer{
+    width:100%;
+    max-width:450px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:16px;
+    font-size:12px;
+    color:var(--g-text-secondary);
+    padding:0 8px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .footer select{
+    border:none;
+    background:transparent;
+    font-size:12px;
+    color:var(--g-text-secondary);
+    font-family:inherit;
+    cursor:pointer;
+    padding:4px;
+  }
+  .footer a{color:var(--g-text-secondary);text-decoration:none;padding:4px}
+  .footer a:hover{color:var(--g-text)}
+
+  /* Модальное окно */
+  .modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:16px;
+    backdrop-filter:blur(3px);
+  }
+  .modal.show{display:flex}
+  .modal-content{
+    background:#fff;
+    border-radius:12px;
+    padding:32px 24px;
+    width:100%;
+    max-width:420px;
+    text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,.3);
+    animation:pop .25s ease;
+  }
+  @keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+  .modal-content h2{
+    color:var(--g-error);
+    font-size:22px;
+    margin-bottom:16px;
+    font-weight:500;
+  }
+  .mem-gif{
+    width:100%;
+    max-width:360px;
+    border-radius:8px;
+    margin:0 auto 16px;
+    display:block;
+  }
+  .modal-content p{
+    font-size:15px;
+    line-height:1.55;
+    color:var(--g-text-secondary);
+    margin-bottom:20px;
+  }
+  .btn-danger{
+    background:var(--g-error);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:500;
+    cursor:pointer;
+    font-family:inherit;
+    width:100%;
+  }
+  .btn-danger:hover{background:#b3261e}
+
+  /* Скрытые блоки */
+  .hidden{display:none !important}
+
+  /* Адаптив */
+  @media (max-width:480px){
+    .card{
+      border:none;
+      padding:24px 0;
+      max-width:100%;
+    }
+    body{justify-content:flex-start;padding-top:40px}
+    .footer{padding:0 4px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ЭТАП 1: ввод email/телефона -->
+<div class="card" id="step-email">
+  <!-- Логотип Google -->
+  <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+
+  <h1>Вход</h1>
+  <div class="subtitle">Используйте аккаунт Google</div>
+
+  <form id="form-email" novalidate>
+    <div class="field">
+      <input type="text" id="identifier" placeholder=" " autocomplete="username" spellcheck="false" autocapitalize="none">
+      <label for="identifier">Телефон или адрес электронной почты</label>
+    </div>
+    <div class="error-msg" id="err-identifier">Введите адрес электронной почты или номер телефона.</div>
+
+    <a class="link" href="#" onclick="return false;">Забыли адрес электронной почты?</a>
+
+    <div class="actions">
+      <button type="button" class="btn-create" onclick="return false;">Создать аккаунт</button>
+      <button type="submit" class="btn-next">Далее</button>
+    </div>
+  </form>
+</div>
+
+<!-- ЭТАП 2: ввод пароля -->
+<div class="card hidden" id="step-password">
+  <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+
+  <h1>Вход</h1>
+  <div class="subtitle">Используйте аккаунт Google</div>
+
+  <form id="form-password" novalidate>
+    <div class="show-pass" id="user-chip" style="margin-bottom:16px;padding:6px 10px;border:1px solid var(--g-border);border-radius:20px;display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:default;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span id="email-display"></span>
+    </div>
+
+    <div class="field">
+      <input type="password" id="password" placeholder=" " autocomplete="current-password">
+      <label for="password">Введите пароль</label>
+    </div>
+    <div class="error-msg" id="err-password">Введите пароль. Длина пароля должна быть не менее 8 символов.</div>
+
+    <label class="show-pass">
+      <input type="checkbox" id="show-password" onchange="togglePassword()">
+      Показать пароль
+    </label>
+
+    <a class="link" href="#" onclick="return false;" style="margin-top:20px;">Забыли пароль?</a>
+
+    <div class="actions">
+      <button type="button" class="btn-create" onclick="backToEmail()">Назад</button>
+      <button type="submit" class="btn-next">Далее</button>
+    </div>
+  </form>
+</div>
+
+<!-- Футер -->
+<div class="footer" id="footer">
+  <select aria-label="Смена языка">
+    <option>Русский</option>
+    <option>English (United States)</option>
+    <option>English (United Kingdom)</option>
+  </select>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="#" onclick="return false;">Помощь</a>
+    <a href="#" onclick="return false;">Конфиденциальность</a>
+    <a href="#" onclick="return false;">Условия</a>
+  </div>
+</div>
+
+<!-- Модальное окно предупреждения -->
+<div class="modal" id="alert-modal">
+  <div class="modal-content">
+    <h2>⚠️ Вы передали данные мошенникам</h2>
+    <!-- Замените mem.gif на путь к вашей гифке -->
+    <img src="mem.gif" alt="Гифка-предупреждение" class="mem-gif">
+    <p>В реальной ситуации ваш аккаунт Google был бы украден. Никогда не вводите пароль на подозрительных сайтах и всегда проверяйте адресную строку браузера!</p>
+    <button type="button" class="btn-danger" onclick="closeAlert()">Я понял</button>
+  </div>
+</div>
+
+<script>
+  // ---------- Состояние ----------
+  let currentEmail = '';
+
+  // ---------- DOM ----------
+  const stepEmail = document.getElementById('step-email');
+  const stepPassword = document.getElementById('step-password');
+  const footer = document.getElementById('footer');
+  const inputIdentifier = document.getElementById('identifier');
+  const inputPassword = document.getElementById('password');
+  const errIdentifier = document.getElementById('err-identifier');
+  const errPassword = document.getElementById('err-password');
+  const emailDisplay = document.getElementById('email-display');
+  const showPasswordCheckbox = document.getElementById('show-password');
+
+  // ---------- Плавающие подписи ----------
+  function syncFilled(input){
+    input.classList.toggle('filled', input.value.length > 0);
+  }
+  [inputIdentifier, inputPassword].forEach(inp => {
+    inp.addEventListener('input', () => {
+      syncFilled(inp);
+      inp.classList.remove('error');
+      (inp === inputIdentifier ? errIdentifier : errPassword).classList.remove('show');
+    });
+    inp.addEventListener('blur', () => syncFilled(inp));
+  });
+
+  // ---------- Валидация email/телефона ----------
+  function validateIdentifier(value){
+    const v = value.trim();
+    if (v.length === 0) return {ok:false, msg:'Введите адрес электронной почты или номер телефона.'};
+    // Простая проверка: email содержит @ и точку, либо телефон от 10 цифр
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRe = /^\+?[\d\s\-()]{10,}$/;
+    if (!emailRe.test(v) && !phoneRe.test(v)){
+      return {ok:false, msg:'Введите действительный адрес электронной почты или номер телефона.'};
+    }
+    return {ok:true};
+  }
+
+  // ---------- Валидация пароля (как на Google: минимум 8 символов) ----------
+  function validatePassword(value){
+    if (value.length === 0) return {ok:false, msg:'Введите пароль.'};
+    if (value.length < 8) return {ok:false, msg:'Пароль слишком короткий. Введите не менее 8 символов.'};
+    return {ok:true};
+  }
+
+  // ---------- Этап 1: отправка email ----------
+  document.getElementById('form-email').addEventListener('submit', (e) => {
+    e.preventDefault(); // НЕ отправляем данные
+    const value = inputIdentifier.value;
+    const res = validateIdentifier(value);
+    if (!res.ok){
+      inputIdentifier.classList.add('error');
+      errIdentifier.textContent = res.msg;
+      errIdentifier.classList.add('show');
+      return;
+    }
+    currentEmail = value.trim();
+    // Переход на этап пароля
+    emailDisplay.textContent = currentEmail;
+    stepEmail.classList.add('hidden');
+    stepPassword.classList.remove('hidden');
+    footer.classList.add('hidden');
+    // Очищаем поле пароля на всякий случай
+    inputPassword.value = '';
+    inputPassword.classList.remove('filled','error');
+    errPassword.classList.remove('show');
+    showPasswordCheckbox.checked = false;
+    inputPassword.type = 'password';
+    setTimeout(() => inputPassword.focus(), 50);
+  });
+
+  // ---------- Этап 2: отправка пароля ----------
+  document.getElementById('form-password').addEventListener('submit', (e) => {
+    e.preventDefault(); // НЕ отправляем данные
+    const value = inputPassword.value;
+    const res = validatePassword(value);
+    if (!res.ok){
+      inputPassword.classList.add('error');
+      errPassword.textContent = res.msg;
+      errPassword.classList.add('show');
+      return;
+    }
+    // Имитация успешного «входа» — показываем предупреждение
+    openAlert();
+  });
+
+  // ---------- Показ/скрытие пароля ----------
+  function togglePassword(){
+    inputPassword.type = showPasswordCheckbox.checked ? 'text' : 'password';
+  }
+
+  // ---------- Назад к email ----------
+  function backToEmail(){
+    stepPassword.classList.add('hidden');
+    stepEmail.classList.remove('hidden');
+    footer.classList.remove('hidden');
+    inputIdentifier.focus();
+  }
+
+  // ---------- Модальное окно ----------
+  function openAlert(){
+    const modal = document.getElementById('alert-modal');
+    modal.classList.add('show');
+    // Очищаем поля — данные нигде не сохраняются
+    inputIdentifier.value = '';
+    inputPassword.value = '';
+    inputIdentifier.classList.remove('filled','error');
+    inputPassword.classList.remove('filled','error');
+    errIdentifier.classList.remove('show');
+    errPassword.classList.remove('show');
+    // Сбрасываем на первый этап, чтобы можно было повторить демонстрацию
+    stepPassword.classList.add('hidden');
+    stepEmail.classList.remove('hidden');
+    footer.classList.remove('hidden');
+    currentEmail = '';
+  }
+
+  function closeAlert(){
+    document.getElementById('alert-modal').classList.remove('show');
+  }
+
+  // ---------- Поддержка ?alert=true (как в VK-примере) ----------
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('alert') === 'true'){
+      openAlert();
+    } else {
+      inputIdentifier.focus();
+    }
+  });
+</script>
+</body>
+</html>
