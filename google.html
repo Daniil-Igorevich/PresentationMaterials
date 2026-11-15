@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Вход – Google Аккаунты</title>
 <style>
   :root{
@@ -13,6 +13,10 @@
     --g-border:#dadce0;
     --g-error:#d93025;
     --g-bg:#fff;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{width:100%;max-width:100vw;overflow-x:hidden}
@@ -22,14 +26,19 @@
     background:var(--g-bg);
     color:var(--g-text);
     min-height:100vh;
+    min-height:100dvh;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:24px 16px;
+    padding:
+      calc(24px + var(--safe-top))
+      calc(16px + var(--safe-right))
+      calc(24px + var(--safe-bottom))
+      calc(16px + var(--safe-left));
   }
 
-  /* Карточка */
+  /* ---------- Карточка (десктоп) ---------- */
   .card{
     width:100%;
     max-width:450px;
@@ -37,20 +46,20 @@
     border-radius:8px;
     padding:48px 40px 36px;
     text-align:center;
+    background:#fff;
   }
 
   .logo{width:48px;height:48px;margin:0 auto 16px;display:block}
 
   h1{font-size:24px;font-weight:400;margin-bottom:8px}
   .subtitle{font-size:16px;color:var(--g-text);margin-bottom:32px}
-  .subtitle .email{font-weight:500}
 
-  /* Поле с плавающей подписью */
+  /* ---------- Поля ---------- */
   .field{position:relative;text-align:left;margin-bottom:6px}
   .field input{
     width:100%;
     padding:13px 15px;
-    font-size:16px;
+    font-size:16px;              /* против авто-зума iOS */
     border:1px solid var(--g-border);
     border-radius:4px;
     outline:none;
@@ -58,6 +67,7 @@
     color:var(--g-text);
     background:transparent;
     font-family:inherit;
+    line-height:1.4;
   }
   .field input:focus{
     border-color:var(--g-blue);
@@ -88,7 +98,6 @@
   .field input.error:focus + label,
   .field input.error.filled + label{color:var(--g-error)}
 
-  /* Сообщение об ошибке под полем */
   .error-msg{
     display:none;
     color:var(--g-error);
@@ -99,7 +108,7 @@
   }
   .error-msg.show{display:block}
 
-  /* Кнопки-ссылки */
+  /* ---------- Ссылки и кнопки ---------- */
   .link{
     display:inline-block;
     font-size:14px;
@@ -108,6 +117,7 @@
     font-weight:500;
     margin:8px 0 28px;
     cursor:pointer;
+    align-self:flex-start;
   }
   .link:hover{text-decoration:underline}
 
@@ -129,6 +139,7 @@
     border-radius:4px;
     cursor:pointer;
     font-family:inherit;
+    white-space:nowrap;
   }
   .btn-create:hover{background:rgba(26,115,232,.04)}
 
@@ -143,27 +154,51 @@
     cursor:pointer;
     font-family:inherit;
     transition:background .15s, box-shadow .15s;
+    white-space:nowrap;
   }
   .btn-next:hover{background:var(--g-blue-hover);box-shadow:0 1px 2px rgba(60,64,67,.3)}
   .btn-next:active{box-shadow:0 1px 3px rgba(60,64,67,.4)}
 
-  /* Показ пароля */
+  /* ---------- Чип с email на шаге пароля ---------- */
+  .user-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    max-width:100%;
+    padding:6px 12px 6px 8px;
+    border:1px solid var(--g-border);
+    border-radius:20px;
+    font-size:14px;
+    margin:0 auto 20px;
+    color:var(--g-text);
+    background:#fff;
+  }
+  .user-chip svg{flex-shrink:0}
+  .user-chip span{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width:260px;
+  }
+
+  /* ---------- Показ пароля ---------- */
   .show-pass{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:10px;
     font-size:14px;
     color:var(--g-text);
-    margin:12px 0 0 0;
+    margin:14px 0 0 0;
     text-align:left;
     cursor:pointer;
     user-select:none;
+    min-height:24px;
   }
   .show-pass input{
-    width:18px;height:18px;accent-color:var(--g-blue);cursor:pointer;
+    width:18px;height:18px;accent-color:var(--g-blue);cursor:pointer;flex-shrink:0;
   }
 
-  /* Футер */
+  /* ---------- Футер ---------- */
   .footer{
     width:100%;
     max-width:450px;
@@ -184,12 +219,13 @@
     color:var(--g-text-secondary);
     font-family:inherit;
     cursor:pointer;
-    padding:4px;
+    padding:6px 4px;
   }
-  .footer a{color:var(--g-text-secondary);text-decoration:none;padding:4px}
+  .footer-links{display:flex;gap:4px;flex-wrap:wrap}
+  .footer a{color:var(--g-text-secondary);text-decoration:none;padding:6px 4px}
   .footer a:hover{color:var(--g-text)}
 
-  /* Модальное окно */
+  /* ---------- Модалка ---------- */
   .modal{
     display:none;
     position:fixed;
@@ -246,26 +282,161 @@
   }
   .btn-danger:hover{background:#b3261e}
 
-  /* Скрытые блоки */
   .hidden{display:none !important}
 
-  /* Адаптив */
-  @media (max-width:480px){
+  /* ============================================================
+     МОБИЛЬНАЯ ВЕРСИЯ (≤ 600px) — как настоящий Google на телефоне
+     ============================================================ */
+  @media (max-width: 600px){
+    body{
+      justify-content:flex-start;
+      align-items:stretch;
+      padding:
+        calc(12px + var(--safe-top))
+        calc(24px + var(--safe-right))
+        calc(12px + var(--safe-bottom))
+        calc(24px + var(--safe-left));
+    }
+
+    /* Форма на всю ширину, без рамки */
     .card{
       border:none;
-      padding:24px 0;
+      border-radius:0;
+      padding:24px 0 16px;
+      max-width:100%;
+      text-align:left;
+      flex:0 0 auto;
+    }
+
+    .logo{
+      width:40px;
+      height:40px;
+      margin:0 0 20px 0;
+    }
+
+    h1{
+      font-size:24px;
+      text-align:left;
+      margin-bottom:6px;
+    }
+
+    .subtitle{
+      font-size:15px;
+      text-align:left;
+      margin-bottom:28px;
+    }
+
+    /* Поле — крупнее, на всю ширину */
+    .field input{
+      padding:16px 15px;
+      font-size:16px;
+    }
+
+    /* Ссылка «Забыли…» — слева, компактно */
+    .link{
+      margin:10px 0 24px;
+      font-size:14px;
+    }
+
+    /* Кнопки: «Создать аккаунт» слева текстом, «Далее» — крупная снизу */
+    .actions{
+      flex-direction:column-reverse;
+      align-items:stretch;
+      gap:12px;
+      margin-top:24px;
+    }
+    .btn-create{
+      align-self:flex-start;
+      padding:10px 0;
+      text-align:left;
+      font-size:14px;
+    }
+    .btn-next{
+      width:100%;
+      padding:14px 24px;
+      font-size:15px;
+      border-radius:4px;
+    }
+
+    /* Чип email — центрируем и ограничиваем */
+    .user-chip{
+      align-self:center;
+      margin:0 0 24px;
       max-width:100%;
     }
-    body{justify-content:flex-start;padding-top:40px}
-    .footer{padding:0 4px}
+    .user-chip span{max-width:70vw}
+
+    /* Футер прижат к низу экрана, в 2 ряда */
+    .footer{
+      margin-top:auto;
+      padding:16px 0 8px;
+      border-top:1px solid #f1f3f4;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:4px;
+      max-width:100%;
+      padding-left:0;
+      padding-right:0;
+    }
+    .footer-links{
+      width:100%;
+      justify-content:space-between;
+    }
+
+    /* Модалка — во весь экран на телефоне */
+    .modal{padding:0}
+    .modal-content{
+      border-radius:0;
+      max-width:100%;
+      min-height:100dvh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:32px 24px;
+      padding-top:calc(32px + var(--safe-top));
+      padding-bottom:calc(32px + var(--safe-bottom));
+    }
+    .mem-gif{max-width:100%}
+  }
+
+  /* ============================================================
+     ПЛАНШЕТ (601–900px) — карточка, но чуть компактнее
+     ============================================================ */
+  @media (min-width:601px) and (max-width:900px){
+    .card{padding:40px 32px 32px}
+  }
+
+  /* ============================================================
+     НИЗКИЕ ЭКРАНЫ (landscape-телефон) — уменьшаем вертикаль
+     ============================================================ */
+  @media (max-height: 500px) and (orientation: landscape){
+    body{justify-content:flex-start;padding-top:calc(16px + var(--safe-top))}
+    .card{padding:16px 32px}
+    .logo{width:32px;height:32px;margin-bottom:12px}
+    h1{font-size:20px;margin-bottom:4px}
+    .subtitle{margin-bottom:16px;font-size:14px}
+    .field input{padding:10px 13px}
+    .link{margin:6px 0 14px}
+    .actions{margin-top:12px}
+    .footer{margin-top:12px}
+  }
+
+  /* ============================================================
+     УМЕНЬШЕННАЯ АНИМАЦИЯ
+     ============================================================ */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<!-- ЭТАП 1: ввод email/телефона -->
+<!-- ================= ЭТАП 1: email ================= -->
 <div class="card" id="step-email">
-  <!-- Логотип Google -->
   <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -278,7 +449,7 @@
 
   <form id="form-email" novalidate>
     <div class="field">
-      <input type="text" id="identifier" placeholder=" " autocomplete="username" spellcheck="false" autocapitalize="none">
+      <input type="text" id="identifier" placeholder=" " autocomplete="username" spellcheck="false" autocapitalize="none" inputmode="email">
       <label for="identifier">Телефон или адрес электронной почты</label>
     </div>
     <div class="error-msg" id="err-identifier">Введите адрес электронной почты или номер телефона.</div>
@@ -292,7 +463,7 @@
   </form>
 </div>
 
-<!-- ЭТАП 2: ввод пароля -->
+<!-- ================= ЭТАП 2: пароль ================= -->
 <div class="card hidden" id="step-password">
   <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -304,12 +475,12 @@
   <h1>Вход</h1>
   <div class="subtitle">Используйте аккаунт Google</div>
 
-  <form id="form-password" novalidate>
-    <div class="show-pass" id="user-chip" style="margin-bottom:16px;padding:6px 10px;border:1px solid var(--g-border);border-radius:20px;display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:default;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      <span id="email-display"></span>
-    </div>
+  <div class="user-chip">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span id="email-display"></span>
+  </div>
 
+  <form id="form-password" novalidate>
     <div class="field">
       <input type="password" id="password" placeholder=" " autocomplete="current-password">
       <label for="password">Введите пароль</label>
@@ -330,21 +501,21 @@
   </form>
 </div>
 
-<!-- Футер -->
+<!-- ================= Футер ================= -->
 <div class="footer" id="footer">
   <select aria-label="Смена языка">
     <option>Русский</option>
     <option>English (United States)</option>
     <option>English (United Kingdom)</option>
   </select>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+  <div class="footer-links">
     <a href="#" onclick="return false;">Помощь</a>
     <a href="#" onclick="return false;">Конфиденциальность</a>
     <a href="#" onclick="return false;">Условия</a>
   </div>
 </div>
 
-<!-- Модальное окно предупреждения -->
+<!-- ================= Модалка ================= -->
 <div class="modal" id="alert-modal">
   <div class="modal-content">
     <h2>⚠️ Вы передали данные мошенникам</h2>
@@ -356,10 +527,8 @@
 </div>
 
 <script>
-  // ---------- Состояние ----------
   let currentEmail = '';
 
-  // ---------- DOM ----------
   const stepEmail = document.getElementById('step-email');
   const stepPassword = document.getElementById('step-password');
   const footer = document.getElementById('footer');
@@ -370,7 +539,7 @@
   const emailDisplay = document.getElementById('email-display');
   const showPasswordCheckbox = document.getElementById('show-password');
 
-  // ---------- Плавающие подписи ----------
+  /* Плавающие подписи */
   function syncFilled(input){
     input.classList.toggle('filled', input.value.length > 0);
   }
@@ -383,11 +552,10 @@
     inp.addEventListener('blur', () => syncFilled(inp));
   });
 
-  // ---------- Валидация email/телефона ----------
+  /* Валидация email/телефона */
   function validateIdentifier(value){
     const v = value.trim();
     if (v.length === 0) return {ok:false, msg:'Введите адрес электронной почты или номер телефона.'};
-    // Простая проверка: email содержит @ и точку, либо телефон от 10 цифр
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRe = /^\+?[\d\s\-()]{10,}$/;
     if (!emailRe.test(v) && !phoneRe.test(v)){
@@ -396,79 +564,71 @@
     return {ok:true};
   }
 
-  // ---------- Валидация пароля (как на Google: минимум 8 символов) ----------
+  /* Валидация пароля — минимум 8 символов, как у Google */
   function validatePassword(value){
     if (value.length === 0) return {ok:false, msg:'Введите пароль.'};
     if (value.length < 8) return {ok:false, msg:'Пароль слишком короткий. Введите не менее 8 символов.'};
     return {ok:true};
   }
 
-  // ---------- Этап 1: отправка email ----------
+  /* Шаг 1 → Шаг 2 */
   document.getElementById('form-email').addEventListener('submit', (e) => {
-    e.preventDefault(); // НЕ отправляем данные
-    const value = inputIdentifier.value;
-    const res = validateIdentifier(value);
+    e.preventDefault();
+    const res = validateIdentifier(inputIdentifier.value);
     if (!res.ok){
       inputIdentifier.classList.add('error');
       errIdentifier.textContent = res.msg;
       errIdentifier.classList.add('show');
       return;
     }
-    currentEmail = value.trim();
-    // Переход на этап пароля
+    currentEmail = inputIdentifier.value.trim();
     emailDisplay.textContent = currentEmail;
     stepEmail.classList.add('hidden');
     stepPassword.classList.remove('hidden');
     footer.classList.add('hidden');
-    // Очищаем поле пароля на всякий случай
     inputPassword.value = '';
     inputPassword.classList.remove('filled','error');
     errPassword.classList.remove('show');
     showPasswordCheckbox.checked = false;
     inputPassword.type = 'password';
     setTimeout(() => inputPassword.focus(), 50);
+    window.scrollTo(0,0);
   });
 
-  // ---------- Этап 2: отправка пароля ----------
+  /* Шаг 2 → предупреждение */
   document.getElementById('form-password').addEventListener('submit', (e) => {
-    e.preventDefault(); // НЕ отправляем данные
-    const value = inputPassword.value;
-    const res = validatePassword(value);
+    e.preventDefault();
+    const res = validatePassword(inputPassword.value);
     if (!res.ok){
       inputPassword.classList.add('error');
       errPassword.textContent = res.msg;
       errPassword.classList.add('show');
       return;
     }
-    // Имитация успешного «входа» — показываем предупреждение
     openAlert();
   });
 
-  // ---------- Показ/скрытие пароля ----------
   function togglePassword(){
     inputPassword.type = showPasswordCheckbox.checked ? 'text' : 'password';
   }
 
-  // ---------- Назад к email ----------
   function backToEmail(){
     stepPassword.classList.add('hidden');
     stepEmail.classList.remove('hidden');
     footer.classList.remove('hidden');
+    window.scrollTo(0,0);
     inputIdentifier.focus();
   }
 
-  // ---------- Модальное окно ----------
   function openAlert(){
     const modal = document.getElementById('alert-modal');
     modal.classList.add('show');
-    // Очищаем поля — данные нигде не сохраняются
     inputIdentifier.value = '';
     inputPassword.value = '';
     inputIdentifier.classList.remove('filled','error');
     inputPassword.classList.remove('filled','error');
     errIdentifier.classList.remove('show');
     errPassword.classList.remove('show');
-    // Сбрасываем на первый этап, чтобы можно было повторить демонстрацию
     stepPassword.classList.add('hidden');
     stepEmail.classList.remove('hidden');
     footer.classList.remove('hidden');
@@ -477,9 +637,9 @@
 
   function closeAlert(){
     document.getElementById('alert-modal').classList.remove('show');
+    window.scrollTo(0,0);
   }
 
-  // ---------- Поддержка ?alert=true (как в VK-примере) ----------
   window.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('alert') === 'true'){
