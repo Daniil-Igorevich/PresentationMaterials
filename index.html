@@ -38,6 +38,15 @@
     background:var(--accent);z-index:200;transition:width .1s linear;
   }
 
+  /* ============ БЛОКИРУЕМАЯ ЧАСТЬ ============ */
+  #lockable{transition:filter .45s ease}
+  #lockable.locked-content{
+    filter:blur(8px) saturate(.85);
+    pointer-events:none;
+    user-select:none;
+  }
+  body.locked{overflow:hidden}
+
   /* ------- Шапка ------- */
   .site-header{
     position:sticky;top:0;z-index:50;
@@ -319,15 +328,7 @@
   .site-footer a{color:var(--text-2);text-decoration:none;margin-right:18px}
   .site-footer a:hover{color:var(--accent)}
 
-  /* ============ БЛОКИРОВКА ============ */
-  body.locked{overflow:hidden}
-  #lockable{transition:filter .45s ease}
-  #lockable.locked-content{
-    filter:blur(8px) saturate(.85);
-    pointer-events:none;
-    user-select:none;
-  }
-
+  /* ============ ОКНО ВХОДА ============ */
   .gate-overlay{
     position:fixed;
     inset:0;
@@ -486,26 +487,28 @@
 
 <div class="read-progress" id="readProgress"></div>
 
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="#" onclick="return false;">
-      <span class="brand-mark">ИБ</span>
-      <span class="brand-text">
-        <b>КиберГрамотность</b>
-        <small>учебный портал</small>
-      </span>
-    </a>
-    <nav class="nav">
-      <a href="#" onclick="return false;">Материалы</a>
-      <a href="#" onclick="return false;" class="active">Статьи</a>
-      <a href="#" onclick="return false;">Курсы</a>
-      <a href="#" onclick="return false;">Практикум</a>
-    </nav>
-    <button class="header-btn" onclick="return false;">Войти</button>
-  </div>
-</header>
-
+<!-- ============ ВСЁ, ЧТО БЛЮРИТСЯ, — ВНУТРИ #lockable ============ -->
 <div id="lockable">
+
+  <!-- Шапка теперь тоже блюрится -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" onclick="return false;">
+        <span class="brand-mark">ИБ</span>
+        <span class="brand-text">
+          <b>КиберГрамотность</b>
+          <small>учебный портал</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="#" onclick="return false;">Материалы</a>
+        <a href="#" onclick="return false;" class="active">Статьи</a>
+        <a href="#" onclick="return false;">Курсы</a>
+        <a href="#" onclick="return false;">Практикум</a>
+      </nav>
+      <button class="header-btn" onclick="return false;">Войти</button>
+    </div>
+  </header>
 
   <div class="container">
     <div class="crumbs">
@@ -779,7 +782,9 @@
     </div>
   </footer>
 </div>
+<!-- /#lockable -->
 
+<!-- ============ ОКНО ВХОДА ============ -->
 <div class="gate-overlay" id="gateOverlay">
   <div class="gate">
     <div class="gate-icon">🔒</div>
@@ -816,11 +821,12 @@
   </div>
 </div>
 
+<!-- ============ МОДАЛКА РЕГИСТРАЦИИ ============ -->
 <div class="reg-overlay" id="regOverlay">
   <div class="reg-box">
 
     <div id="regLoading">
-      <h3>Регистрация</h3>
+      <h3>Создание аккаунта</h3>
       <div class="sub">Пожалуйста, подождите…</div>
       <div class="spinner"></div>
     </div>
@@ -929,14 +935,8 @@
     if (e.target === regOverlay) closeRegister();
   });
 
-  gateOverlay.addEventListener('click', (e) => {
-    if (e.target === gateOverlay){
-      gateOverlay.classList.remove('show');
-      setTimeout(() => {
-        if (!gateOverlay.classList.contains('show')) gateOverlay.classList.add('show');
-      }, 1200);
-    }
-  });
+  // ВАЖНО: обработчика клика по gateOverlay больше нет —
+  // окно входа нельзя закрыть кликом вне его.
 </script>
 </body>
 </html>
